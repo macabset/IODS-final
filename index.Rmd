@@ -1,0 +1,44 @@
+---
+title: "IODS Final Assignment"
+author: "Maika"
+date: "28 helmikuuta 2017"
+output: 
+  html_document:
+    theme: readable
+    highlight: tango
+    toc: true
+    toc_depth: 2
+    toc_floath: true
+    fig_caption: true
+    fig_width: 6
+    fig_height: 4
+    code_folding: hide
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Introduction to open data science
+##What have we learned?
+
+This is a progress of Bachelor level historian developing her skills with statistics with r-software. I have statistics as a minor and just started with R. My message to all of you is: If I can do this, so can you. I'm not saying it's easy, but I'm saying it's possible.
+
+This course has been an introductory to R-software using R-studio, Github and DataCamp. Through these weeks we have lerned to use R.markdown files, how to push changes with github from r.mrakdown to a html web page. We have also learned different data wrangling and analysing techiques briefly with data camp: [link](https://www.datacamp.com/)
+
+This is the final assignment for the course introduction to open data science. In this step we create our own web pages from the scrach.
+
+In my github repository everyone can see the r-markdown codes for this web page. Basically it means, that if you have Rstudio and github username, you can copy the text and code from my github file, so YOU can make your own web page, too. How cool is that! Link to my Github repository is as promised: [link](https://github.com/macabset/IODS-final)
+
+What I've done so far can be seen in my course diary: [link](https://macabset.github.io/IODS-project/). We have had weekly assignments regarding a different data analysing method each week.
+
+If you keep up with me (and I strongly recommend that you will), you will learn how real life data is wrangled so that logistic regression can be calculated and visualized. I'll do my best to explain evry step adequately.
+
+#Data:human
+#Wrangling Human
+#Logistic Regression
+#Conclusion
+
+
+
