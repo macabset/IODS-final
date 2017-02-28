@@ -35,7 +35,7 @@ What I've done so far can be seen in my course diary: [link](https://macabset.gi
 
 If you keep up with me (and I strongly recommend that you will), you will learn how real life data is wrangled so that logistic regression can be calculated and visualized. I'll do my best to explain evry step adequately.
 
-#Data:human
+#Data: human
 #Wrangling Human
 #Logistic Regression
 #Conclusion
