@@ -16,9 +16,6 @@ output:
   
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 #Introduction to open data science
 ##What have we learned?
@@ -36,8 +33,238 @@ What I've done so far can be seen in my course diary: [link](https://macabset.gi
 If you keep up with me (and I strongly recommend that you will), you will learn how real life data is wrangled so that logistic regression can be calculated and visualized. I'll do my best to explain evry step adequately.
 
 #Data: human
+```{r}
+#Packages we need in this workout
+library(GGally)
+library(dplyr)
+library(corrplot)
+library(FactoMineR)
+library(ggplot2)
+library(tidyr)
+library(MASS)
+```
+
+I'm going to use my human data from previous excercises. The dataset originates from United Nations Development Programme(http://hdr.undp.org/en/content/human-development-index-hdi). 
+
+I find this data the most interesting one, since it's actual data that describes the wellbeing of nations in a very multilinear way. In stead of just using Gross National Product r Index as an explaining variable, we can take inequality or education levels as variables. This way we do not compare nations simply based on their wealth but based on their human capacity. 
+
+Variables
+
+I have created a subset called "human" with 8 variables and 155 observations. Variables modified from original dataset are Country, sex_edu2, Lab_ratio and GNI. For further information about modifications made, you can go and check my github repository: https://github.com/macabset/IODS-project/blob/master/data/create_human.R
+
+Underneath are the names of the 8 variables and their description.
+
+Country: used as rownames, regions not included
+
+Sex_edu2: ratio of females to males in at least secondary education
+Lab-ratio: ratio of female labour force to male labour force
+Edu_expect: Expected years of education
+Life_expect: Life expectancy at birth
+GNI: Gross National Income per capita
+Mom_death: Maternal mortality ratio
+Young_birth: Adolescent birth rate
+Present_parl: Percentage of female representatives in parliament
+Observations
+
+In addition I have excluded missing values from our data set by removing them.
+
+
+
+```{r}
+getwd()
+human2 <- read.csv("data/human2.csv", sep=",", header = TRUE, row.names = 1)
+str(human2)
+dim(human2)
+complete.cases(human2)
+head(human2)
+```
+
+```{r}
+cor_matrix<-cor(human2) %>% round(digits=2)
+cor_matrix
+```
+
+```{r}
+corrplot(cor_matrix, method="circle", type="upper", cl.pos="b", tl.pos="d", tl.cex=0.6)
+```
+
 #Wrangling Human
-#Logistic Regression
+
+scaling human
+
+```{r}
+# center and standardize variables
+human_scaled <- scale(human2)
+
+# summaries of the scaled variables
+summary(human_scaled)
+
+# class of the boston_scaled object
+class(human_scaled)
+
+#change the object to data frame
+human_scaled <- as.data.frame(human_scaled)
+class(human_scaled)
+```
+
+Creating a factor variable
+
+```{r}
+
+# save the scaled crim as scaled_crim
+scaled_eduexp <- human_scaled$Edu.exp
+
+# summary of the scaled_crim
+summary(scaled_eduexp)
+
+# create a quantile vector of crim and print it
+bins <- quantile(scaled_eduexp)
+bins
+
+# create a categorical variable 'crime'
+eduexp <- cut(scaled_eduexp, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
+
+# look at the table of the new factor crime
+table(eduexp)
+
+# remove original crim from the dataset
+human_scaled <- dplyr::select(human_scaled, -Edu.exp)
+
+# add the new categorical value to scaled data
+human_scaled <- data.frame(human_scaled, eduexp)
+str(human_scaled)
+```
+
+```{r}
+# number of rows in the Boston dataset 
+n <- nrow(human_scaled)
+
+# choose randomly 80% of the rows
+ind <- sample(n,  size = n * 0.8)
+
+# create train set
+train <- human_scaled[ind,]
+
+# create test set 
+test <- human_scaled[-ind,]
+
+# save the correct classes from test data
+correct_classes <- test$eduexp
+summary(correct_classes)
+
+# remove the crime variable from test data
+test <- dplyr::select(test, -eduexp)
+```
+
+#LDA
+```{r}
+lda.fit <- lda(formula= eduexp ~ ., data = train)
+
+# print the lda.fit object
+lda.fit
+
+# the function for lda biplot arrows
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+
+# target classes as numeric
+classes <- as.numeric(train$eduexp)
+
+# plot the lda results
+plot(lda.fit, dimen = 2, col=classes, pch=classes)
+lda.arrows(lda.fit, myscale = 1)
+```
+
+```{r}
+# predict classes with test data
+lda.pred <- predict(lda.fit, newdata = test)
+
+# cross tabulate the results
+table(correct = correct_classes, predicted = lda.pred$class)
+```
+#clustering
+```{r}
+human_scaled2 <- scale(human2)
+summary(human_scaled2)
+class(human_scaled2)
+human_scaled2<- as.data.frame(human_scaled2)
+```
+k-means
+```{r}
+dist_eu <- dist(human_scaled2)
+
+# look at the summary of the distances
+summary(dist_eu)
+```
+
+```{r}
+library(ggplot2); library(GGally)
+set.seed(123)
+
+# euclidean distance matrix
+
+# determine the number of clusters
+k_max <- 10
+
+# calculate the total within sum of squares
+twcss <- sapply(1:k_max, function(k){kmeans(dist_eu, k)$tot.withinss})
+
+# visualize the results
+plot(1:k_max, twcss, type='b')
+```
+
+```{r}
+# k-means clustering
+km <-kmeans(dist_eu, centers = 2)
+
+human_scaled2$km <- as.factor(km$cluster)
+
+# plot the Boston dataset with clusters
+ggpairs(human_scaled2, ggplot2::aes(colour=km))
+```
+```{r}
+# k-means again
+set.seed(123)
+km2 <- kmeans(dist_eu, centers = 5)
+
+# LDA with using the k-means clusters as target classes
+human_scaled2$cl <- km2$cluster
+lda.fit2 <- lda(cl ~ ., data = human_scaled2)
+plot(lda.fit2, col=as.numeric(human_scaled2$cl), dimen=2)
+lda.arrows(lda.fit2, myscale = 3, col = "#666666")
+```
+Perform k-means on the original Boston data with some reasonable number of clusters (> 2). Remember to standardize the dataset. Then perform LDA using the clusters as target classes. Include all the variables in the Boston data in the LDA model. Visualize the results with a biplot (include arrows representing the relationships of the original variables to the LDA solution). Interpret the results. Which variables are the most influencial linear separators for the clusters? (2 points to compensate any loss of points from previous exercises)
+
+Super-Bonus: Run the code below for the (scaled) train data that you used to fit the LDA. The code creates a matrix product, which is a projection of the data points.
+
+model_predictors <- dplyr::select(train, -crim)
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
+library(plotly)
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=train$crim)
+
+```{r}
+model_predictors <- dplyr::select(train, -eduexp)
+# check the dimensions
+dim(model_predictors)
+dim(lda.fit$scaling)
+# matrix multiplication
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
+library(plotly)
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=train$eduexp)
+```
+Next, install and access the Plotly package. Create a 3D plot (Cool!) of the columns of the matrix product by typing the code below.
+
+
+#Extra
+
 #Conclusion
 
 
