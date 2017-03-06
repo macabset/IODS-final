@@ -50,7 +50,7 @@ colnames(gii2)[10] <- "LabM"
 colnames(gii2)
 
 #Mutate: gii
-#3 new variables
+#2 new variables
 
 gii2 <- mutate(gii2, Edu2FM = Edu2F / Edu2M)
 gii2 <- mutate(gii2, LabFM = LabF/LabM)
@@ -82,9 +82,14 @@ human2 <- mutate(human2, GNI = as.numeric(human2$GNI))
 str(human2)
 colnames(human2)
 
+#2.mutate HDI to numeric
+human2 <- mutate(human2, HDI = as.numeric(human2$HDI))
+str(human2)
+colnames(human2)
+
 #2. Keep columns: (described in the meta file above):  "Country", "Edu2.FM", "Labo.FM", "Edu.Exp", "Life.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F" and edu.y.mean
 
-keep_columns <- c("Country", "HDI", "Edu2FM","LabFM", "Edu.exp", "Life.exp", "GNI", "Mot.mor", "Adol.birth", "Parl.F", "Edu.y.mean")
+keep_columns <- c("Country", "Edu2FM","LabFM","HDI", "Edu.exp", "Life.exp", "GNI", "Mot.mor", "Adol.birth", "Parl.F", "Edu.y.mean")
 human2 <- select(human2, one_of(keep_columns))
 str(human2)
 
