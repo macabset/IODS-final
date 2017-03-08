@@ -44,7 +44,7 @@ I find this data the most interesting one we've used, since it's actual data tha
 
 ##2.1 Variables
 
-I have created a subset called "human2", since we have already used human data previously. The data consists of 10 variables and 155 observations. Variables modified from original dataset are Country, Edu2FM, LabFM and GNI. All variables are numeric and continuous. For further information about modifications made, you can go and check my Github repository: [link](https://github.com/macabset/IODS-project/blob/master/data/create_human.R)
+I have created a subset called "human2", since we have already used human data previously. The data consists of 10 variables and 155 observations. Variables modified from original dataset are Country, Edu2FM, LabFM and GNI. All variables are numeric and continuous. For further information about modifications made, you can go and check my Github repository: [link](https://github.com/macabset/IODS-final/blob/master/data/human_data2.R)
 
 
 ```{r}
