@@ -1,3 +1,15 @@
+#name: Maija Absetz
+#email: maija.absetz@helsinki.fi
+#8.3.2017
+#Final assifgnment with human data. Data will be used for classification and clustering
+
+#This is strongly based on ch4 modifications. New adjustments will be marked with "!!!".#!!! Rest of the required data wrangling is done in the web page: https://macabset.github.io/IODS-final/#
+#New wranglings will be: 1. New categorical variable eduexp.
+# 2. Scaled dataset
+# 3. train set and test set.
+# I believe the structure is more logical if that much data wrangling is done at the web page in stead of here.
+
+
 #Setting the needed packages and working directory to my computer:
 
 library(Matrix)
@@ -7,7 +19,7 @@ library(dplyr)
 
 getwd()
 
-#Read files Human development and gender inequality to R
+#Read files Human development and gender inequality to R. 
 
 hd2 <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human_development.csv", stringsAsFactors = F)
 
@@ -26,6 +38,8 @@ summary(hd2)
 summary(gii2)
 
 #Let's give our variables shorter names, so they will be easier to use further.
+#!!! New, clearer names compared to previous exercise.
+
 colnames(hd2)
 colnames(hd2)[1] <-"HDI.rank"
 colnames(hd2)[3] <-"HDI"
@@ -82,12 +96,9 @@ human2 <- mutate(human2, GNI = as.numeric(human2$GNI))
 str(human2)
 colnames(human2)
 
-#2.mutate HDI to numeric
-human2 <- mutate(human2, HDI = as.numeric(human2$HDI))
-str(human2)
-colnames(human2)
 
-#2. Keep columns: (described in the meta file above):  "Country", "Edu2.FM", "Labo.FM", "Edu.Exp", "Life.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F" and edu.y.mean
+#2. Keep columns: Country, Edu2FM, Edu.exp, Life.exp, GNI, Mot.mor, Adol.birth, Parl.F 
+#!!!: and 2 new variables Edu.y.mean, HDI.
 
 keep_columns <- c("Country", "Edu2FM","LabFM","HDI", "Edu.exp", "Life.exp", "GNI", "Mot.mor", "Adol.birth", "Parl.F", "Edu.y.mean")
 human2 <- select(human2, one_of(keep_columns))
@@ -126,3 +137,4 @@ str(human2)
 summary(human2)
 complete.cases(human)
 head(human)
+

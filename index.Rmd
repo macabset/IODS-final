@@ -1,7 +1,7 @@
 ---
 title: "IODS Final Assignment"
-author: "Maika"
-date: "28 helmikuuta 2017"
+author: "Maija Absetz"
+date: "8.3.2017"
 email: "maija.absetz@helsinki.fi"
 output: 
   html_document:
@@ -16,23 +16,25 @@ output:
     code_folding: hide
   
 ---
+#Abstract
 
+This is the final assignment for open data course, where data from human development programme will be used. Focus of this assignment will be on expected years of education and I will perform LDA analysis to find out what are the variables that determine the level of education.In addition, LDA results with target variable expected years of education will be compared to LDA with clusters as target variables. Both find mother's mortality rate being in significant role and life expectancy and mean yeras of education in additional place to determine the expected years of education.
 
 #1 Introduction to open data science
-##1.1 What have we learned?
+##1.1 What have we done so far
 
-This is a progress of a Bachelor level historian developing her skills with statistics with r-software. I have statistics as a minor and just started with R programming language. My message to all of you is: If I can do this, so can you. I'm not saying it's easy, but I'm saying it's possible.
+This is a sample of a progress of a Bachelor level historian developing her skills with statistics with R-software. I have statistics as a minor and just started with R programming language. My message to all of you is: If I can do this, so can you. I'm not saying it's easy, but I'm saying it's possible.
 
-This course has been an introductory course to R-software using R-studio, Github and DataCamp. Through these weeks we have learned how to use R.markdown files and how to push changes with Github from R.mrakdown files to an html web page. We have also learned different data wrangling and analysing techniques briefly with data camp: [link](https://www.datacamp.com/)
+This course has been an introductory course to R-software using R-studio, Github and DataCamp. Through these weeks we have learned how to use R.markdown files and how to push changes from R.mrakdown files to an html web page with Github. We have also learned different data wrangling and analysing techniques briefly with data camp: [link](https://www.datacamp.com/)
 
-What I've done so far can be seen in my course diary: [link](https://macabset.github.io/IODS-project/). We have had weekly assignments regarding a different data analysing method each week.
+What I've done so far in this course can be seen at my course diary: [link](https://macabset.github.io/IODS-project/). We have had weekly assignments regarding a different data analysing method each week.
 
 ##1.2 What lies ahead of us
-This is the final assignment for the course introduction to open data science. In this assignment we create our own web pages from the scratch. (Oh, yes, you're reading it.)
+This is the final assignment for the course introduction to open data science. In this assignment we create our own web pages from the scratch (Oh, yes, you're reading it) and perform statistical analysis with data chosen.
 
-At my Github repository everyone can see the R.markdown codes for this web page. Basically it means that if you have Rstudio and Github username, you can copy the text and code from my Github file, so YOU can make your own web page, too. How cool is that! Link to my Github repository is as promised: [link](https://github.com/macabset/IODS-final)
+At my Github repository anyone can see the R.markdown codes for this web page. Basically, it means that if you have Rstudio and Github username, YOU can make your own web page, too. How cool is that! Link to my Github repository is as promised: [link](https://github.com/macabset/IODS-final)
 
-If you keep up with me (and I recommend that you will), you will learn how real life data is wrangled so that classes and groups from the data can be calculated and visualized. I'll do my best to explain every step adequately.
+If you keep up with me, you will see how real life data is wrangled so that classes and groups from the data can be predicted and visualized. I'll do my best to explain every step adequately.
 
 #2 Data: human
 
@@ -44,6 +46,17 @@ I find this data the most interesting one we've used, since it's actual data tha
 
 I have created a subset called "human2", since we have already used human data previously. The data consists of 10 variables and 155 observations. Variables modified from original dataset are Country, Edu2FM, LabFM and GNI. All variables are numeric and continuous. For further information about modifications made, you can go and check my Github repository: [link](https://github.com/macabset/IODS-project/blob/master/data/create_human.R)
 
+
+```{r}
+#Bringing data to R.markdown + summaries
+getwd()
+human2 <- read.csv("data/human2.csv", sep=",", header = TRUE, row.names = 1)
+
+str(human2)
+dim(human2)
+
+head(human2)
+```
 The data wrangling done here is strongly based on the original ch4 workout. In addition I have added variable HDI and mean years of education. I hope these additions will provide more of background knowledge to the evaluations of the connections. Later on I will continue data wrangling for the analysing part.
 
 Underneath are the names of the 10 variables and their description.
@@ -55,16 +68,21 @@ Underneath are the names of the 10 variables and their description.
   + Edu.exp: Expected years of education
   + Life.exp: Life expectancy at birth
   + GNI: Gross National Income per capita
-  + Mot.mor: Maternal mortality ratio
+  + Mot.mor: Mothers' mortality ratio
   + Adol.birth: Adolescent birth rate
-  + Adol.birth: Percentage of female representatives in parliament
+  + Parl.F: Percentage of female representatives in parliament
   + HDI: human development index. Combination of education, life expectation and GNI.
   + Edu.y.mean: mean years of education/ Country
 
 In addition I have excluded missing values from our data set by removing them.
 
 ```{r}
-#Packages we need in this workout
+#Complete cases, whithout missing values
+complete.cases(human2)
+
+```
+```{r}
+#Packages we may need in this workout
 library(GGally)
 library(dplyr)
 library(corrplot)
@@ -74,40 +92,29 @@ library(tidyr)
 library(MASS)
 ```
 
+##2.2 Picturing human
 
-```{r}
-getwd()
-human2 <- read.csv("data/human2.csv", sep=",", header = TRUE, row.names = 1)
-
-str(human2)
-dim(human2)
-complete.cases(human2)
-head(human2)
-```
-
-##2.2 Picturing the data
-
-Let's do some correlation matrices and plots to visualize them in order to notice the connection between variables.
+Let's do some correlation matrices and plots to visualize them in order to notice the connection between variables. After that we can do some prelimenary assumptions to our results.
 
 ```{r}
 cor_human<-cor(human2) %>% round(digits=2)
 cor_human 
-
 ```
 
-PUT TITLE IN THE PLOT: "Correlation between variables in human data"
 ```{r}
 #Visualize correlation matrix with a plot
-corrplot(cor_human, method="circle", type="upper", cl.pos="b", tl.pos="d", tl.cex=0.6)
-title("Correlation between variables", line= -30)
+title <- "Correlations between variables in human data"
 
+corrplot(cor_human, method="circle", type="upper", cl.pos="b", tl.pos="d", tl.cex=0.6, title = title,  mar=c(0,0,1,0))
 ```
-Figure 1. Correlations between variables in human data
 
-HDI has the highest correlations of all, but that is expected since it is a combination variable of many others. This shows, that HDI works as it's is supposed to; it is able to combine variables concerning a long and healthy life and a long education to it. In addition it also reveals that not taking care of mother's influences to general human development negatively. 
+*Figure 1. Correlations between variables in human data*
+
+In figure 1we see that HDI has the highest correlations of all, but that is expected since it is a combination variable of many others. This shows, that HDI works as it's is supposed to; it is able to combine variables concerning a long and healthy life and a long education to it. In addition it also reveals that not taking care of mother's influences to general human development negatively. 
 
 More precisely, mothers' high mortality rate influences negatively to life expectancy in general. It is not as strong as HDI, but quite strong nevertheless (-0.74). When more mothers die, the expected years of education lower, too. When taking a sub group of adolescent mothers, the interpretation is similar.
 
+With these correlations I can assume that HDI, mothers' mortality rate and adolescent birth rate determine tge expected years of education. In other words: if a state can make its citizens have a long and healthy life, it increases level's of education, too.
 
 #3 Method: classification
 Our data concerns broad view on human capacity and in my opinion, education is one of the best ways to increase human capacity. If we want to use fully our potential human capacity, we need to find out what are the structures that determine the level of education. It is in the hands of politicians to determine what the best level of education is but it is the work of science to find out what are the reasons why some people have a certain level of education.
@@ -118,7 +125,7 @@ Because I'm interested in expected levels of education, I believe classification
 
 But first we need to wrangle the data in order to make analysing with LDA possible. Let's find out what we need to do by looking the summary of the data.
 
-*summary of the data*
+*Summary of the data*
 ```{r}
 summary(human2)
 ```
@@ -132,9 +139,10 @@ gather(human2) %>% ggplot(aes(value,fill="#99999",alpha=0.3)) + facet_wrap("key"
   ggtitle("Density plots of the variables in the human data") +
   theme(plot.title = element_text(hjust = 0.5,size=16,face='bold'),legend.position="none")
 ```
-Figure 2. Density plots of the variables in the human data
 
-LDA assumes that variables are normally distributed. In this case, mothers' mortality rate and adolescent birth rates are biased both to the left. All other are reasonably normally distributed.
+*Figure 2. Density plots of the variables in the human data*
+
+LDA assumes that variables are normally distributed. In figure 2 we see that mothers' mortality rate and adolescent birth rates are biased both to the left. All other are reasonably normally distributed.
 
 ### scaling human
 
@@ -158,7 +166,7 @@ Now we have values only between -5 to 5. It is also transformed back to data fra
 ###Creating levels of education
 Now all we need is the target variable from the expected level of education. What we need is to divide our expected level of education to four classes based on expected years of education.
 
-*factor variable*
+*Factor variable*
 
 ```{r}
 
@@ -195,7 +203,7 @@ In order to divide our education level to groups in the original data we need a 
 
 We'll divide the whole data so, that randomly selected 80% of the data is used for the training and rest 20% for testing. We also need to exclude and save the original observations from expected level of education. Since that is what we want to compare to, it cannot be in the testing set.
 
-*test and train*
+*Test and train*
 ```{r}
 # number of rows in the human dataset 
 n <- nrow(human_scaled)
@@ -251,20 +259,22 @@ lda.arrows(lda.fit, myscale = 2)
 
 
 ```
+
 Our plot for the LDA is actually also a dimensionally reduced way of picturing the results. It reduces our 10 variable plots to 2 components: LD1 and LD2. LD1 captures 92% of between group variance and LD2 is left with 6%.
 
-I have created two plots to picture the model: first one to emphasize how well the groups are separated by giving each group a different colour and second plot to emphasize the variables as arrows. The longer the arrow and narrower the angle between axis and an arrow, the stronger the connection between LD components and variables. The more separated groups the better the model.
+I have created two plots to picture the model: figure 3 emphasizes how well the groups are separated by giving each group a different colour and figure 4 emphasizes the variables as arrows. The longer the arrow and narrower the angle between axis and an arrow, the stronger the connection between LD components and variables. The more separated groups the better the model.
 
-Expected years of education have been predicted as levels by the LDA model and shown as a plot above. It shows the groups low to high in different colours and arrows as original variables that determine the groups. In our plot "1" we can see that the high end and the low end are best separated. In our plot "2" we can notice that HDI has the biggest connection to LD1 and so captures the largest variance between our groups of expected years of education. In other words, HDI is our strongest variable that separates the groups. Mother's mortality rate is the second strongest explanatory variable and strongly connected to LD2.
+In figure 3 we can see that the high end and the low end are best separated. In figure 4 we notice that HDI has the biggest connection to LD1 and so captures the largest variance between our groups of expected years of education. In other words, HDI is our strongest variable that separates the groups. Mother's mortality rate is the second strongest explanatory variable and strongly connected to LD2.
 
 But since HDI is a combination variable based on already existing variables, I want to test what can be seen without it. That is why I'll exclude it in the second model, so it won't cloud the interpretation of the results. So here we will do just as before but just without the HDI.
 
-*Datawithout HDI*
+*Data without HDI*
 
 ```{r}
 human_scaled2 <-human_scaled
 human_scaled2 <- dplyr::select(human_scaled2, -HDI)
 ```
+
 *Test and training set without HDI*
 
 ```{r}
@@ -317,11 +327,13 @@ plot(lda.fit2, dimen=2, cex = c(0.1), main = "Figure 6. LDA model 2, arrows")
 lda.arrows2(lda.fit2, myscale = 2)
 ```
 
-As we can see in picture "1", without HDI our groups are a bit more mixed up, especially in med low and med high levels of education. In picture "2", we notice that mothers' mortality seems to be in great value, capturing second most variance from the data and determining how to group the education levels. When comparing to model one, we see that mean years of education is only one even closely related to LD1. That means that HDI in the first model was mainly based on years of education and life expectancy at birth.
+As we can see in figure 5, without HDI our groups are a bit more mixed up, especially in med low and med high levels of education. In figure 6, we notice that mothers' mortality seems to be in great value, capturing second most variance from the data and determining how to group the education levels. When comparing to model one, we see that mean years of education is only one even closely related to LD1. That means that HDI in the first model was mainly based on years of education and life expectancy at birth. 
+
+So if the state already has high level of education, it is expected to continue. There is no big surprise in that, so in the sense of our interpretation, mothers' wellbeing and general life expectansies are more interesting results, although statistically less valuable.
 
 What is more visible in the second model is the negative correlation between mother's mortality and education ratio from women to men. The higher the mother's mortality rate, the less women get to over second level education. 
 
-Since the mothers' mortality has a lot stronger connection to LD2 than edu2FM, I'd say that it is the wellbeing of mothers' that count in estimating both expected years of education and the ratio from women to men in education level instead the other way around. The gender inequality in education levels starts already when mothers' mortality rate is high and effects to education levels all together.
+Since the mothers' mortality has a lot stronger connection to LD2 than edu2FM, I'd say that it is the wellbeing of mothers' that count in estimating both expected years of education and the ratio from women to men in education level instead the other way around. The gender inequality in education levels starts already when mothers' mortality rate is high and effects to education levels all together. Unfortunately the mother's mortality rate wasn't distributed perfectly normally. This might change the interpretation of the results a bit and we need to consider its value in caution.
 
 *Model 2 in 3D*
 ```{r}
@@ -337,7 +349,7 @@ plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, 
 ```
 Figure 7. Model 2 in 3D
 
-In our plot "x" we can see the groups in 3D in our LDA model. So instead of first 2 components it catches first 3 components from model 2. If you turn around the model you can see clear groups with slight mix in the edges of the group centres.
+In figure 7 we can see the groups in 3D in our LDA model. So instead of first 2 components it catches first 3 components from model 2. The 3 components catch 99% of the between group variance. If you turn around the model you can see clear groups with slight mix in the edges of the group centres.
 
 ##3.3 Predicting power of the models
 We have interpreted the results but are the results valid? This is the point where we need our test set to test how well our models predict the data not used for training.
@@ -376,7 +388,7 @@ I was also interested if our classification with expected years of education was
 
 Clustering is an unsupervised method which divides our data to groups without knowing the classes beforehand. In this exercise we will use k-means, which is one of the most used methods to perform clustering.
 
-But first, we need to scale our data again in order to calculate distances between observations properly. We will do that without HDI, since we discovered that it is more detailed in describing data.
+But first, we need to scale our data again in order to calculate distances between observations properly. We will do that without HDI, since we discovered that model 2 is more detailed in describing data.
 
 *Summary of the scaled human3*
 ```{r}
@@ -391,7 +403,7 @@ human_scaled3<- as.data.frame(human_scaled3)
 ```
 ##4.1 k-means
 
-Because clustering (with k-means) is an unsupervised method, we do not know the optimal number of clusters beforehand. That's why we use WCSS (total within sum of squares) to find out the optimal number of clusters. That's when in plot "x" the line drops rapidly. In this case, it's 2 clusters. When two clusters, the observations are the closest to cluster centre.
+Because clustering (with k-means) is an unsupervised method, we do not know the optimal number of clusters beforehand. That's why we use WCSS (total within sum of squares) to find out the optimal number of clusters. That's when in figure 8 the line drops rapidly. In this case, it's 2 clusters. When two clusters, the observations are the closest to cluster centre.
 
 ```{r}
 dist_eu <- dist(human_scaled3)
@@ -415,7 +427,7 @@ twcss <- sapply(1:k_max, function(k){kmeans(dist_eu, k)$tot.withinss})
 # visualize the results
 plot(1:k_max, twcss, type='b', main="Results of the total whithin sum of squares")
 ```
-Figure 8. Results of the total whithin sum of squares
+*Figure 8. Results of the total whithin sum of squares*
 
 Now let's do kmeans clustering with 2 centers.
 
@@ -426,14 +438,17 @@ km <-kmeans(dist_eu, centers = 2)
 human_scaled3$km <- as.factor(km$cluster)
 
 # plot the human dataset with clusters
-ggpairs(human_scaled3,  ggplot2::aes(colour=km))
+ggpairs(human_scaled3,  ggplot2::aes(colour=km), title="Paired variables with clusters")
 
 ```
-If we compare these clusters to our previous classification results, we find out that expected years of education is strongly correlated to life expectancy (0.78) as in classification, but highest to mean years of education (0.83). It is also correlated to both mother's mortality (0.73) and adolescent births (0.70) as in classification method. Although, adolescent birth rate has a stronger influence than it has in classification. 
+*Figure 9. Paired variables with clusters*
 
-Although our optimal amount of clusters was 2, I will test it with the same amount of clusters as was in our classification. Then I will perform LDA with 4 clusters and clusters as target variable. Then I will compare the results of the LDA with classification method.
+
+If we compare these clusters from figure 9 to our previous classification results, we find out that expected years of education is strongly correlated to life expectancy (0.78) as in classification, but highest to mean years of education (0.83). It is also correlated to both mother's mortality (0.73) and adolescent births (0.70) as in classification method. Although, adolescent birth rate has a stronger influence than it has in classification. 
+
 
 ##4.2 LDA with k-means
+Although our optimal amount of clusters was 2, I will test it with the same amount of clusters as was in our classification. Then I will perform LDA with 4 clusters and clusters as target variable. Then I will compare the results of the LDA with classification method.
 
 ```{r}
 # k-means again
@@ -444,19 +459,21 @@ km2 <- kmeans(dist_eu, centers = 4)
 human_scaled3$cl <- km2$cluster
 lda.fit3 <- lda(cl ~ ., data = human_scaled3)
 lda.fit3
-plot(lda.fit3, col=as.numeric(human_scaled3$cl), dimen=2, main = "Figure x. LDA model 3")
+plot(lda.fit3, col=as.numeric(human_scaled3$cl), dimen=2, main = "Figure 9. LDA model 3")
 lda.arrows(lda.fit3, myscale = 2, col = "#666666")
 ```
 
-In our LDA model 3 we have a lot of similarities to models 1 and 2 with the classification method. Mother's mortality is again almost exactly lined with LD2 and collects most of the variation within the groups in the data. Also mother's mortality is negatively correlated to ratio of women to men in higher education.
+In our LDA model 3 we have a lot of similarities to models 1 and 2 with the classification method. Figure 9 shows that mother's mortality rate is again almost exactly lined with LD2 and collects most of the variation within the groups in the data (after mean years of education). Also mother's mortality is negatively correlated to ratio of women to men in higher education: when women die in greater numbers they have more struggle to get to higher education.
 
-As we saw in our classification method, mothers' mortality, life expectancy and mean years of education are the most significant variables. Although when performing classification with clusters instead of education levels, we found out those same factors determine the groups. Clustering did confirm valid our original separation based on levels of education and the key variables.
+As we saw in our classification method, mothers' mortality, life expectancy and mean years of education are the most significant variables. When performing classification with clusters instead of education levels, we found out those same factors determine the groups. Clustering did confirm valid our original separation based on levels of education and the key variables.
 
 
 #5 Conclusive remarks
 
+I conclude that mothers' mortality rate, life expectancy and mean years of education are the key variables when determining the level of expected years in education as was expected. Adolescent birth rate did not stand out as an important factor as was expected in hypothesis level. 
 
-I conclude that mothers' mortality rate, life expectancy and mean years of education are the key variables when determining the level of expected years in education
+Both mothers' mortality rate and adolescent birth rate were bit curved to the left, so these results might not be as strong as suggested. With bigger data sample this hypotheses could be tested further.
 
-Surprisingly enough mothers' mortality is more important factor than Gross national index. It seems that it is more important to take care of the mothers than money if we want highest possible education. So in order to flourish, nations need to take care of their women.
+Surprisingly enough, mothers' mortality is more important factor than Gross national income. It seems that it is more important to take care of the mothers than money if we want highest possible education. So in order to flourish, nations need to take care of their women.
 
+Happy womens' day!
