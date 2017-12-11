@@ -1,8 +1,9 @@
 ---
 title: "IODS Final Assignment"
-author: "Maija Absetz"
+author: 
+- name: "Maija Absetz"  
+  affiliation: "maija.absetz@helsinki.fi"
 date: "8.3.2017"
-email: "maija.absetz@helsinki.fi"
 output: 
   html_document:
     theme: readable
